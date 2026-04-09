@@ -1,0 +1,66 @@
+.layout {
+  min-height: 100vh;
+  padding: 24px;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  margin: 0 0 4px;
+}
+
+.header p {
+  margin: 0;
+  color: #475569;
+}
+
+.board {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) minmax(320px, 1.6fr) minmax(220px, 1fr);
+  margin-bottom: 16px;
+}
+
+.team {
+  display: grid;
+  gap: 8px;
+}
+
+.team h2,
+.stage h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.stage {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 14px;
+}
+
+.timeline {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 14px;
+}
+
+.timeline h3 {
+  margin: 0 0 8px;
+}
+
+.timeline ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 1024px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+}

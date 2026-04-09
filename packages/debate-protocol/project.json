@@ -1,0 +1,19 @@
+{
+  "name": "debate-protocol",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/debate-protocol/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/debate-protocol",
+        "main": "packages/debate-protocol/src/index.ts",
+        "tsConfig": "packages/debate-protocol/tsconfig.lib.json",
+        "assets": ["packages/debate-protocol/*.md"]
+      }
+    }
+  }
+}

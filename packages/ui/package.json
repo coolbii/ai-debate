@@ -1,0 +1,19 @@
+{
+  "name": "@agora/ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  },
+  "dependencies": {
+    "@agora/shared-types": "workspace:*",
+    "react": "^19.0.0",
+    "tslib": "^2.3.0"
+  }
+}

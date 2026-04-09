@@ -1,0 +1,19 @@
+{
+  "name": "prompt-spec",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/prompt-spec/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/prompt-spec",
+        "main": "packages/prompt-spec/src/index.ts",
+        "tsConfig": "packages/prompt-spec/tsconfig.lib.json",
+        "assets": ["packages/prompt-spec/*.md"]
+      }
+    }
+  }
+}
