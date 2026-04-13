@@ -1,0 +1,135 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background .15s, opacity .15s;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.primary   { background: #6366f1; color: #fff; }
+.primary:hover:not(:disabled) { background: #4f46e5; }
+
+.secondary { background: #0f172a; color: #fff; }
+.secondary:hover:not(:disabled) { background: #1e293b; }
+
+.ghost { background: #f1f5f9; color: #374151; border: 1px solid #d1d5db; }
+.ghost:hover:not(:disabled) { background: #e2e8f0; }
+
+.warning { background: #fef9c3; color: #a16207; border: 1px solid #fbbf24; }
+.warning:hover:not(:disabled) { background: #fef08a; }
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #b91c1c;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.noteRow {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f9fafb;
+}
+
+.input:focus { outline: none; border-color: #6366f1; background: #fff; }
+
+.select {
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f9fafb;
+}
+
+.textarea {
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f9fafb;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.textarea:focus, .select:focus { outline: none; border-color: #6366f1; background: #fff; }
+
+.decision {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.winner {
+  font-size: 15px;
+  color: #166534;
+  margin-bottom: 4px;
+}
+
+.reasoning {
+  margin: 0;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}

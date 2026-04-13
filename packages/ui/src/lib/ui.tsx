@@ -1,8 +1,7 @@
 import styles from './ui.module.css';
-import type { DebaterAgent } from '@agora/shared-types';
 
 export type DebaterCardProps = {
-  agent: Pick<DebaterAgent, 'displayName' | 'role' | 'model'>;
+  agent: { displayName: string; role?: string; seat?: string; model: string };
   status: 'standby' | 'speaking' | 'completed';
 };
 
@@ -20,7 +19,7 @@ export function DebaterCard({ agent, status }: DebaterCardProps) {
         <span className={`${styles['status']} ${statusClassName}`}>{status}</span>
       </div>
       <div className={styles['meta']}>
-        <span>role: {agent.role}</span>
+        <span>role: {agent.seat ?? agent.role}</span>
         <span>model: {agent.model}</span>
       </div>
     </div>

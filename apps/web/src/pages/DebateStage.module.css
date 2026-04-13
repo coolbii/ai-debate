@@ -1,0 +1,138 @@
+.layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  background: #f1f5f9;
+  gap: 12px;
+  padding: 12px;
+}
+
+.loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #64748b;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back, .replayBtn {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  color: #374151;
+}
+.back:hover, .replayBtn:hover { background: #f8fafc; }
+
+.header > :nth-child(2) { flex: 1; }
+
+.definition { }
+
+.board {
+  display: grid;
+  grid-template-columns: minmax(200px, 220px) 1fr minmax(200px, 260px);
+  gap: 12px;
+  min-height: 0;
+  height: calc(100vh - 220px);
+}
+
+.teamCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.teamHeading {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.stage {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.teamSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.judgeSection {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 4px;
+  align-items: center;
+}
+
+.timelineNode {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: 2px solid transparent;
+  cursor: default;
+}
+
+.timelineNode.done {
+  background: #bbf7d0;
+  color: #166534;
+}
+
+.timelineNode.active {
+  background: #6366f1;
+  color: #fff;
+  border-color: #4338ca;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.3);
+}
+
+@media (max-width: 900px) {
+  .board {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
