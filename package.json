@@ -5,6 +5,7 @@
   "description": "AI Oregon-style debate system monorepo",
   "scripts": {
     "nx": "nx",
+    "dev": "npx nx run-many -t dev serve --projects=web,api --parallel=2",
     "dev:web": "nx dev web",
     "build:web": "nx build web",
     "dev:api": "nx serve api",
@@ -64,6 +65,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "6.30.3",
-    "zustand": "^5.0.0"
+    "zustand": "^5.0.12"
   }
 }

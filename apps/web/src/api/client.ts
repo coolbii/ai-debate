@@ -107,6 +107,16 @@ export const api = {
     }),
 };
 
+// ── Export helpers ──────────────────────────────────────────────────────────
+
+export function downloadTranscript(sessionId: string) {
+  window.open(`${API_BASE}/sessions/${sessionId}/export/transcript`, '_blank');
+}
+
+export function downloadEvents(sessionId: string) {
+  window.open(`${API_BASE}/sessions/${sessionId}/export/events`, '_blank');
+}
+
 // ── WebSocket helper ─────────────────────────────────────────────────────────
 
 const WS_BASE = API_BASE.replace(/^http/, 'ws');

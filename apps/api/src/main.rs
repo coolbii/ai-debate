@@ -6,11 +6,8 @@ mod state;
 
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
-use axum::routing::get;
-use axum::Router;
 
 use interfaces::http_routes::build_router;
-use interfaces::websocket_handlers::handle_ws;
 use state::AppState;
 
 #[tokio::main]
@@ -39,10 +36,8 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let app = build_router(state.clone())
-        .route("/sessions/:id/stream", get(handle_ws))
-        .layer(cors)
-        .with_state(state);
+    let app = build_router(state)
+        .layer(cors);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     tracing::info!("Agora API listening on {}", addr);

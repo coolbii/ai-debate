@@ -2,16 +2,14 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 0;
 }
 
 .heading {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #64748b;
-  letter-spacing: .06em;
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0 0 8px;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .list {
@@ -19,69 +17,84 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   padding-right: 4px;
 }
 
 .empty {
-  color: #94a3b8;
-  font-size: 13px;
+  color: #555;
+  font-style: italic;
   text-align: center;
-  margin-top: 32px;
+  margin-top: 40px;
 }
 
 .entry {
+  padding: 10px 12px;
   border-radius: 8px;
-  padding: 10px 14px;
-  border-left: 3px solid #e2e8f0;
+  background: #1a1a2e;
+  border-left: 3px solid #333;
 }
 
-.entry.affirmative { border-left-color: #6366f1; background: #f5f3ff; }
-.entry.negative    { border-left-color: #f43f5e; background: #fff1f2; }
-.entry.judge       { border-left-color: #f59e0b; background: #fffbeb; }
-.entry.system      { border-left-color: #94a3b8; background: #f8fafc; }
+.affirmative {
+  border-left-color: #3b82f6;
+}
+
+.negative {
+  border-left-color: #ef4444;
+}
+
+.judge {
+  border-left-color: #a78bfa;
+}
+
+.system {
+  border-left-color: #555;
+}
 
 .meta {
   display: flex;
+  gap: 10px;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   flex-wrap: wrap;
 }
 
 .name {
-  font-size: 13px;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #e0e0e0;
 }
 
 .kind {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: 0.05em;
   padding: 1px 6px;
   border-radius: 4px;
-  background: #e2e8f0;
-  color: #475569;
+  background: #2a2a3a;
+  color: #aaa;
 }
 
 .phase {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 0.65rem;
+  color: #666;
 }
 
 .content {
+  font-size: 0.85rem;
+  color: #ccc;
+  line-height: 1.55;
   margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #1e293b;
   white-space: pre-wrap;
 }
 
 .claims {
   margin: 6px 0 0;
   padding-left: 18px;
-  font-size: 12px;
-  color: #475569;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.claims li {
+  margin-bottom: 2px;
 }

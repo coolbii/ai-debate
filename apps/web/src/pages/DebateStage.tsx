@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DebaterCard } from '@agora/ui';
 import { useDebateStore } from '../store/debate';
+import { downloadTranscript, downloadEvents } from '../api/client';
 import { DefinitionPanel } from '../components/DefinitionPanel';
 import { RoundStatusBanner } from '../components/RoundStatusBanner';
 import { SpeechPanel } from '../components/SpeechPanel';
@@ -79,6 +80,16 @@ export function DebateStage() {
         >
           Replay
         </button>
+        {events.length > 0 && (
+          <>
+            <button className={styles.replayBtn} onClick={() => downloadTranscript(session.id)}>
+              Export .md
+            </button>
+            <button className={styles.replayBtn} onClick={() => downloadEvents(session.id)}>
+              Export .jsonl
+            </button>
+          </>
+        )}
       </header>
 
       {/* Definition */}

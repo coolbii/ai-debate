@@ -13,6 +13,7 @@ use crate::application::{
     run_turn_use_case::run_next_turn,
     start_session_use_case::{create_session, start_session, CreateSessionParams},
 };
+use crate::interfaces::websocket_handlers::handle_ws;
 use crate::state::AppState;
 
 #[derive(Serialize)]
@@ -201,6 +202,96 @@ async fn handle_judge_note(
     }
 }
 
+// ── GET /sessions/:id/export/transcript ──────────────────────────────────────
+
+async fn handle_export_transcript(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<String>,
+) -> impl IntoResponse {
+    let sessions = state.sessions.read().await;
+    let session = match sessions.get(&id) {
+        Some(s) => s.clone(),
+        None => return not_found("session not found").into_response(),
+    };
+    drop(sessions);
+
+    let agents = state.agents.read().await;
+    let agent_list = agents.get(&id).cloned().unwrap_or_default();
+    drop(agents);
+
+    let events = state.events.read().await;
+    let event_list = events.get(&id).cloned().unwrap_or_default();
+    drop(events);
+
+    let agent_name = |speaker_id: &str| -> String {
+        if speaker_id == "system" { return "System".to_string(); }
+        if speaker_id == "judge" { return "Judge".to_string(); }
+        agent_list.iter().find(|a| a.id == speaker_id)
+            .map(|a| a.display_name.clone())
+            .unwrap_or_else(|| speaker_id.to_string())
+    };
+
+    let mut md = format!("# Debate Transcript\n\n**Motion:** {}\n\n**Definition:** {}\n\n**Mode:** {}\n\n---\n\n",
+        session.motion, session.definition, session.mode);
+
+    for event in &event_list {
+        let kind_str = format!("{:?}", event.kind);
+        md.push_str(&format!("### Round {} — {} ({})\n\n", event.round, event.phase, kind_str));
+        md.push_str(&format!("**{}**\n\n", agent_name(&event.speaker_id)));
+        md.push_str(&format!("{}\n\n", event.content));
+
+        if let Some(meta) = &event.meta {
+            if let Some(claims) = meta.get("key_claims").and_then(|c| c.as_array()) {
+                md.push_str("**Key Claims:**\n");
+                for claim in claims {
+                    if let Some(s) = claim.as_str() {
+                        md.push_str(&format!("- {}\n", s));
+                    }
+                }
+                md.push('\n');
+            }
+        }
+        md.push_str("---\n\n");
+    }
+
+    (
+        StatusCode::OK,
+        [
+            ("content-type", "text/markdown; charset=utf-8"),
+            ("content-disposition", "attachment; filename=\"transcript.md\""),
+        ],
+        md,
+    ).into_response()
+}
+
+// ── GET /sessions/:id/export/events ─────────────────────────────────────────
+
+async fn handle_export_events(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<String>,
+) -> impl IntoResponse {
+    let events = state.events.read().await;
+    let event_list = events.get(&id).cloned().unwrap_or_default();
+    drop(events);
+
+    let mut jsonl = String::new();
+    for event in &event_list {
+        if let Ok(line) = serde_json::to_string(event) {
+            jsonl.push_str(&line);
+            jsonl.push('\n');
+        }
+    }
+
+    (
+        StatusCode::OK,
+        [
+            ("content-type", "application/x-ndjson"),
+            ("content-disposition", "attachment; filename=\"events.jsonl\""),
+        ],
+        jsonl,
+    ).into_response()
+}
+
 // ── GET /health ───────────────────────────────────────────────────────────────
 
 async fn handle_health(State(state): State<Arc<AppState>>) -> impl IntoResponse {
@@ -224,5 +315,8 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/sessions/:id/events", get(handle_get_events))
         .route("/sessions/:id/judge-decision", get(handle_get_judge_decision))
         .route("/sessions/:id/judge-notes", post(handle_judge_note))
+        .route("/sessions/:id/export/transcript", get(handle_export_transcript))
+        .route("/sessions/:id/export/events", get(handle_export_events))
+        .route("/sessions/:id/stream", get(handle_ws))
         .with_state(state)
 }

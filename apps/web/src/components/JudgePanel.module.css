@@ -1,135 +1,173 @@
 .panel {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  padding: 12px;
+  background: #16162a;
+  border: 1px solid #2a2a3a;
+  border-radius: 8px;
 }
 
 .heading {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #64748b;
-  letter-spacing: .06em;
+  font-size: 0.85rem;
+  color: #a78bfa;
+  margin: 0 0 10px;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.btn {
-  padding: 7px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: background .15s, opacity .15s;
-}
-.btn:disabled { opacity: .5; cursor: not-allowed; }
-
-.primary   { background: #6366f1; color: #fff; }
-.primary:hover:not(:disabled) { background: #4f46e5; }
-
-.secondary { background: #0f172a; color: #fff; }
-.secondary:hover:not(:disabled) { background: #1e293b; }
-
-.ghost { background: #f1f5f9; color: #374151; border: 1px solid #d1d5db; }
-.ghost:hover:not(:disabled) { background: #e2e8f0; }
-
-.warning { background: #fef9c3; color: #a16207; border: 1px solid #fbbf24; }
-.warning:hover:not(:disabled) { background: #fef08a; }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fca5a5;
-  color: #b91c1c;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 12px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background: #3a1a1a;
+  color: #f87171;
+  font-size: 0.8rem;
 }
 
 .clearBtn {
   background: none;
   border: none;
+  color: #f87171;
   cursor: pointer;
-  font-size: 16px;
-  color: #b91c1c;
-  line-height: 1;
-  padding: 0;
-  flex-shrink: 0;
+  font-size: 1.1rem;
+  padding: 0 4px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  background: #1a1a2e;
+  color: #ccc;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: #2a2a4a;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+.primary:hover {
+  background: #2563eb;
+}
+
+.secondary {
+  background: #2a2a4a;
+  border-color: #4a4a6a;
+}
+
+.ghost {
+  background: transparent;
+  border-color: #3a3a5a;
+}
+
+.warning {
+  background: #854d0e;
+  border-color: #a16207;
+  color: #fef08a;
 }
 
 .section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2a3a;
 }
 
 .label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
+  display: block;
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .noteRow {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .input {
   flex: 1;
-  padding: 7px 10px;
-  border: 1px solid #d1d5db;
+  padding: 6px 10px;
+  border: 1px solid #2a2a3a;
   border-radius: 6px;
-  font-size: 13px;
-  background: #f9fafb;
+  background: #0e0e1a;
+  color: #e0e0e0;
+  font-size: 0.8rem;
 }
 
-.input:focus { outline: none; border-color: #6366f1; background: #fff; }
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
 
 .select {
-  padding: 7px 10px;
-  border: 1px solid #d1d5db;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #2a2a3a;
   border-radius: 6px;
-  font-size: 13px;
-  background: #f9fafb;
+  background: #0e0e1a;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
 }
 
 .textarea {
-  padding: 7px 10px;
-  border: 1px solid #d1d5db;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #2a2a3a;
   border-radius: 6px;
-  font-size: 13px;
-  background: #f9fafb;
-  font-family: inherit;
+  background: #0e0e1a;
+  color: #e0e0e0;
+  font-size: 0.8rem;
   resize: vertical;
+  margin-bottom: 8px;
+  font-family: inherit;
 }
 
-.textarea:focus, .select:focus { outline: none; border-color: #6366f1; background: #fff; }
+.textarea:focus, .select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
 
 .decision {
-  background: #f0fdf4;
-  border: 1px solid #86efac;
+  margin-top: 12px;
+  padding: 12px;
+  background: #1b2a1b;
+  border: 1px solid #2a4a2a;
   border-radius: 8px;
-  padding: 12px 14px;
 }
 
 .winner {
-  font-size: 15px;
-  color: #166534;
-  margin-bottom: 4px;
+  font-size: 0.9rem;
+  color: #4ade80;
+  margin-bottom: 6px;
 }
 
 .reasoning {
+  font-size: 0.8rem;
+  color: #aaa;
   margin: 0;
-  font-size: 13px;
-  color: #166534;
   line-height: 1.5;
 }

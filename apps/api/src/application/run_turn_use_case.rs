@@ -23,34 +23,54 @@ pub async fn run_next_turn(state: Arc<AppState>, session_id: &str) -> Result<Deb
 
     let turn = get_turn(current_round).ok_or_else(|| anyhow!("no turn plan for round {}", current_round))?;
 
-    // Find the speaker agent
-    let agents = state.agents.read().await;
-    let session_agents = agents.get(session_id).ok_or_else(|| anyhow!("agents not found"))?;
+    // Find the speaker agent — clone needed data within lock scope
+    struct SpeakerInfo {
+        id: String,
+        display_name: String,
+        persona: String,
+        objective: String,
+        style: String,
+    }
+    struct TargetInfo {
+        id: String,
+        display_name: String,
+    }
 
-    let (speaker, target) = match turn.kind {
-        TurnKind::Closing => {
-            // Closing: no specific speaker — we synthesise from both sides
-            (None, None)
-        }
-        _ => {
-            let spk_side = turn.speaker_side.unwrap();
-            let spk_seat = turn.speaker_seat.unwrap();
-            let speaker = session_agents.iter().find(|a| {
-                let side_str = match a.side { DebateSide::Affirmative => "affirmative", DebateSide::Negative => "negative" };
-                side_str == spk_side && a.seat == spk_seat
-            }).ok_or_else(|| anyhow!("speaker not found: {} {}", spk_side, spk_seat))?;
+    let (speaker_info, target_info) = {
+        let agents = state.agents.read().await;
+        let session_agents = agents.get(session_id).ok_or_else(|| anyhow!("agents not found"))?;
 
-            let tgt = if let (Some(ts), Some(tseat)) = (turn.target_side, turn.target_seat) {
-                session_agents.iter().find(|a| {
+        match turn.kind {
+            TurnKind::Closing => (None, None),
+            _ => {
+                let spk_side = turn.speaker_side.unwrap();
+                let spk_seat = turn.speaker_seat.unwrap();
+                let speaker = session_agents.iter().find(|a| {
                     let side_str = match a.side { DebateSide::Affirmative => "affirmative", DebateSide::Negative => "negative" };
-                    side_str == ts && a.seat == tseat
-                })
-            } else {
-                None
-            };
-            (Some(speaker), tgt)
+                    side_str == spk_side && a.seat == spk_seat
+                }).ok_or_else(|| anyhow!("speaker not found: {} {}", spk_side, spk_seat))?;
+
+                let tgt = if let (Some(ts), Some(tseat)) = (turn.target_side, turn.target_seat) {
+                    session_agents.iter().find(|a| {
+                        let side_str = match a.side { DebateSide::Affirmative => "affirmative", DebateSide::Negative => "negative" };
+                        side_str == ts && a.seat == tseat
+                    })
+                } else {
+                    None
+                };
+
+                let si = SpeakerInfo {
+                    id: speaker.id.clone(),
+                    display_name: speaker.display_name.clone(),
+                    persona: speaker.persona.clone(),
+                    objective: speaker.objective.clone(),
+                    style: speaker.style.clone(),
+                };
+                let ti = tgt.map(|t| TargetInfo { id: t.id.clone(), display_name: t.display_name.clone() });
+                (Some(si), ti)
+            }
         }
-    };
+    }; // agents lock dropped here
 
     // Build event context: recent transcript (last 5 events)
     let recent_transcript = {
@@ -62,7 +82,6 @@ pub async fn run_next_turn(state: Arc<AppState>, session_id: &str) -> Result<Deb
             .collect();
         recent.join("\n")
     };
-    drop(agents);
 
     let started_at = Utc::now().to_rfc3339();
 
@@ -71,14 +90,14 @@ pub async fn run_next_turn(state: Arc<AppState>, session_id: &str) -> Result<Deb
         return run_closing_turn(state, session_id, &motion, &definition, &model, &mode, &recent_transcript, turn.phase, started_at).await;
     }
 
-    let speaker = speaker.unwrap();
-    let speaker_id = speaker.id.clone();
-    let speaker_name = speaker.display_name.clone();
-    let speaker_persona = speaker.persona.clone();
-    let speaker_objective = speaker.objective.clone();
-    let speaker_style = speaker.style.clone();
-    let target_id = target.map(|t| t.id.clone());
-    let target_name = target.map(|t| t.display_name.clone());
+    let speaker = speaker_info.unwrap();
+    let speaker_id = speaker.id;
+    let speaker_name = speaker.display_name;
+    let speaker_persona = speaker.persona;
+    let speaker_objective = speaker.objective;
+    let speaker_style = speaker.style;
+    let target_id = target_info.as_ref().map(|t| t.id.clone());
+    let target_name = target_info.as_ref().map(|t| t.display_name.clone());
 
     let (kind, task_instruction) = match turn.kind {
         TurnKind::Speech => (

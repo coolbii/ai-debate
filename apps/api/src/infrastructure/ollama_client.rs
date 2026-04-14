@@ -53,8 +53,31 @@ impl OllamaClient {
     }
 
     /// Call Ollama /api/generate and parse the structured JSON output.
-    /// Retries once on JSON parse failure with a stricter prompt.
+    /// Retries up to 2 times on failure (network or JSON parse).
     pub async fn generate(&self, model: &str, prompt: &str) -> Result<DebaterOutput> {
+        let max_retries = 2u32;
+        let mut last_err = anyhow!("no attempt made");
+
+        for attempt in 0..=max_retries {
+            if attempt > 0 {
+                let delay = std::time::Duration::from_millis(1000 * attempt as u64);
+                tracing::warn!("Ollama retry {}/{} after {:?}", attempt, max_retries, delay);
+                tokio::time::sleep(delay).await;
+            }
+
+            match self.generate_once(model, prompt).await {
+                Ok(output) => return Ok(output),
+                Err(e) => {
+                    tracing::warn!("Ollama attempt {} failed: {}", attempt + 1, e);
+                    last_err = e;
+                }
+            }
+        }
+
+        Err(last_err.context(format!("failed after {} retries", max_retries)))
+    }
+
+    async fn generate_once(&self, model: &str, prompt: &str) -> Result<DebaterOutput> {
         let json_schema = serde_json::json!({
             "type": "object",
             "properties": {
