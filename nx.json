@@ -70,5 +70,6 @@
     "test": {
       "cache": true
     }
-  }
+  },
+  "analytics": true
 }

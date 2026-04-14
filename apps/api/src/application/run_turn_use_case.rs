@@ -102,16 +102,12 @@ pub async fn run_next_turn(state: Arc<AppState>, session_id: &str) -> Result<Deb
     let (kind, task_instruction) = match turn.kind {
         TurnKind::Speech => (
             EventKind::Speech,
-            format!(
-                "Deliver your constructive speech. Present your strongest arguments for your side.\n\
-                 Be persuasive and structured. Do NOT introduce arguments that contradict your side's position.",
-            ),
+            "Deliver your constructive speech. Present your strongest arguments for your assigned side. Be persuasive and structured.".to_string(),
         ),
         TurnKind::Question => (
             EventKind::Question,
             format!(
-                "You are cross-examining {}. Ask sharp, probing questions that expose weaknesses in their argument.\n\
-                 Ask 2–3 concise questions. Do not answer — only question.",
+                "Cross-examine {}. Ask 2-3 sharp questions that probe weaknesses in their argument.",
                 target_name.as_deref().unwrap_or("the opposing debater"),
             ),
         ),
@@ -171,10 +167,11 @@ async fn run_closing_turn(
     started_at: String,
 ) -> Result<DebateEvent> {
     let closing_prompt = format!(
-        "Motion: \"{motion}\"\nDefinition: {definition}\n\n\
-         Recent debate:\n{recent_transcript}\n\n\
-         You are the SYSTEM ORCHESTRATOR. Write a closing summary of the debate in JSON format.\n\
-         Summarise the key arguments made by both sides and the state of the debate.\n\
+        "Context: Summarise the following academic debate.\n\
+         Debate motion: {motion}\n\
+         Definition: {definition}\n\n\
+         Full debate transcript:\n{recent_transcript}\n\n\
+         Task: Write a neutral closing summary of the debate, covering key arguments from both sides.\n\
          Mode: {mode}. Be concise.",
     );
 
@@ -243,21 +240,14 @@ fn build_prompt(
     let word_limit = if mode == "demo" { "Keep your response under 150 words." } else { "Keep your response under 300 words." };
 
     format!(
-        "You are {speaker_name}.\n\
-         Persona: {persona}\n\
-         Objective: {objective}\n\
-         Style: {style}\n\n\
-         MOTION: \"{motion}\"\n\
-         DEFINITION: {definition}\n\n\
-         CURRENT PHASE: {phase}\n\n\
-         RECENT DEBATE TRANSCRIPT:\n{recent_transcript}\n\n\
-         YOUR TASK: {task}\n\n\
-         {word_limit}\n\n\
-         Respond in JSON with these fields:\n\
-         - public_speech: your spoken words\n\
-         - key_claims: array of 1-3 main claims you are making\n\
-         - attack_targets: claims from the other side you are challenging\n\
-         - defense_targets: your own claims you are defending\n\
-         - round_summary: one sentence summary of what you did this turn"
+        "Context: This is a formal academic debate competition.\n\
+         Speaker: {speaker_name} (debate style: {style}, approach: {persona})\n\
+         Goal: {objective}\n\n\
+         Debate motion: {motion}\n\
+         Definition: {definition}\n\n\
+         Current phase: {phase}\n\n\
+         Recent transcript:\n{recent_transcript}\n\n\
+         Task for this turn: {task}\n\n\
+         {word_limit}"
     )
 }

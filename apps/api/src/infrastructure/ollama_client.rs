@@ -9,11 +9,16 @@ pub struct OllamaClient {
 }
 
 #[derive(Serialize)]
-struct OllamaRequest {
+struct ChatMessage {
+    role: String,
+    content: String,
+}
+
+#[derive(Serialize)]
+struct OllamaChatRequest {
     model: String,
-    prompt: String,
+    messages: Vec<ChatMessage>,
     stream: bool,
-    format: serde_json::Value,
     options: OllamaOptions,
 }
 
@@ -24,8 +29,13 @@ struct OllamaOptions {
 }
 
 #[derive(Deserialize)]
-struct OllamaResponse {
-    response: String,
+struct OllamaChatResponse {
+    message: ChatMessageContent,
+}
+
+#[derive(Deserialize)]
+struct ChatMessageContent {
+    content: String,
 }
 
 /// Structured output expected from each debater turn
@@ -78,27 +88,28 @@ impl OllamaClient {
     }
 
     async fn generate_once(&self, model: &str, prompt: &str) -> Result<DebaterOutput> {
-        let json_schema = serde_json::json!({
-            "type": "object",
-            "properties": {
-                "public_speech":   { "type": "string" },
-                "key_claims":      { "type": "array", "items": { "type": "string" } },
-                "round_summary":   { "type": "string" },
-                "attack_targets":  { "type": "array", "items": { "type": "string" } },
-                "defense_targets": { "type": "array", "items": { "type": "string" } }
-            },
-            "required": ["public_speech", "key_claims", "round_summary"]
-        });
+        // qwen3's format:"json" silently returns empty content for certain topics.
+        // Instead, we request JSON via the prompt itself and parse manually.
+        let full_prompt = format!(
+            "{}\n\n\
+            Respond in this exact JSON format and nothing else:\n\
+            {{\"public_speech\": \"your speech here\", \"key_claims\": [\"claim1\", \"claim2\"], \"round_summary\": \"one sentence summary\"}}\n\
+            /no_think",
+            prompt,
+        );
 
-        let req = OllamaRequest {
+        let req = OllamaChatRequest {
             model: model.to_string(),
-            prompt: prompt.to_string(),
+            messages: vec![
+                ChatMessage { role: "user".to_string(), content: full_prompt },
+            ],
             stream: false,
-            format: json_schema,
-            options: OllamaOptions { temperature: 0.8, num_predict: 512 },
+            // qwen3 thinking mode can consume tokens from num_predict budget.
+            // /no_think is unreliable, so allocate enough for thinking + content.
+            options: OllamaOptions { temperature: 0.8, num_predict: 4096 },
         };
 
-        let url = format!("{}/api/generate", self.endpoint);
+        let url = format!("{}/api/chat", self.endpoint);
         let resp = self
             .client
             .post(&url)
@@ -113,15 +124,89 @@ impl OllamaClient {
             return Err(anyhow!("Ollama returned {}: {}", status, body));
         }
 
-        let ollama_resp: OllamaResponse = resp.json().await.context("failed to parse Ollama envelope")?;
+        let ollama_resp: OllamaChatResponse = resp.json().await.context("failed to parse Ollama chat response")?;
 
-        serde_json::from_str::<DebaterOutput>(&ollama_resp.response)
-            .context("failed to parse debater JSON output")
+        let raw = &ollama_resp.message.content;
+        tracing::debug!("Ollama raw content ({} chars), done_reason may be length if thinking consumed budget", raw.len());
+
+        // If /no_think failed and content is empty, try to extract from thinking field
+        if raw.trim().is_empty() {
+            tracing::warn!("Empty content — /no_think likely failed, thinking consumed token budget");
+            return Err(anyhow!("Ollama returned empty response (thinking consumed token budget)"));
+        }
+
+        // Try direct parse first
+        if let Ok(output) = serde_json::from_str::<DebaterOutput>(raw) {
+            return Ok(output);
+        }
+
+        // Try extracting JSON from markdown code blocks or surrounding text
+        let extracted = extract_json(raw);
+        if let Ok(output) = serde_json::from_str::<DebaterOutput>(&extracted) {
+            tracing::info!("Parsed output after JSON extraction");
+            return Ok(output);
+        }
+
+        // Last resort: build a fallback from whatever text we got
+        tracing::warn!("Could not parse structured output, using raw text as speech. Raw: {}", &raw[..raw.len().min(300)]);
+        Ok(DebaterOutput {
+            public_speech: extract_text_content(raw),
+            key_claims: vec![],
+            round_summary: "Model returned unstructured output".to_string(),
+            attack_targets: vec![],
+            defense_targets: vec![],
+        })
     }
 
+    #[allow(dead_code)]
     pub async fn healthcheck(&self) -> Result<bool> {
         let url = format!("{}/api/tags", self.endpoint);
         let resp = self.client.get(&url).send().await?;
         Ok(resp.status().is_success())
+    }
+}
+
+/// Extract JSON object from text that may contain markdown fences or extra text.
+fn extract_json(raw: &str) -> String {
+    let trimmed = raw.trim();
+
+    // Strip ```json ... ``` or ``` ... ```
+    if let Some(start) = trimmed.find("```") {
+        let after_fence = &trimmed[start + 3..];
+        // Skip optional language tag (e.g. "json")
+        let content_start = after_fence.find('\n').map(|i| i + 1).unwrap_or(0);
+        let content = &after_fence[content_start..];
+        if let Some(end) = content.find("```") {
+            return content[..end].trim().to_string();
+        }
+    }
+
+    // Find first '{' and last '}' — extract that substring
+    if let (Some(start), Some(end)) = (trimmed.find('{'), trimmed.rfind('}')) {
+        if start < end {
+            return trimmed[start..=end].to_string();
+        }
+    }
+
+    trimmed.to_string()
+}
+
+/// Strip thinking tags and extract readable text from raw model output.
+fn extract_text_content(raw: &str) -> String {
+    let mut text = raw.to_string();
+    // Remove <think>...</think> blocks
+    while let Some(start) = text.find("<think>") {
+        if let Some(end) = text.find("</think>") {
+            text = format!("{}{}", &text[..start], &text[end + 8..]);
+        } else {
+            text = text[..start].to_string();
+            break;
+        }
+    }
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        "[No response generated]".to_string()
+    } else {
+        trimmed.to_string()
     }
 }
